@@ -1,4 +1,4 @@
-# TIVIT - Sistema de catálogo de produtos
+# TIVIT - Product catalog system
 
 This is a service for managing a product catalog. It is developed using [Nest](https://github.com/nestjs/nest) framework with the [TypeScript starter repository](https://github.com/nestjs/typescript-starter).
 
