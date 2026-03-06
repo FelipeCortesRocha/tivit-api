@@ -1,4 +1,3 @@
-import { Category } from 'src/modules/category/category.entity';
 import {
   Entity,
   Column,
@@ -6,6 +5,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
+import { Category } from '../category/category.entity';
 
 export enum ProductStatus {
   DRAFT = 'DRAFT',

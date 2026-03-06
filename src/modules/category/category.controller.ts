@@ -2,9 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
   NotFoundException,
   Param,
   Patch,
@@ -13,10 +11,10 @@ import {
 } from '@nestjs/common';
 import { CategoryRepository } from './category.repository';
 import { Category } from './category.entity';
-import { ZodValidationPipe } from 'src/common/pipes/ZodValidationPipe';
 import * as createCategoryDto from './dtos/createCategoryDto';
 import * as updateCategoryDto from './dtos/updateCategoryDto';
 import { Not } from 'typeorm';
+import { ZodValidationPipe } from '../../common/pipes/ZodValidationPipe';
 
 @Controller('categories')
 export class CategoryController {
@@ -31,7 +29,11 @@ export class CategoryController {
   async getCategory(
     @Param('categoryId') categoryId: string,
   ): Promise<Category> {
-    return await this.categoryRepository.findById(categoryId);
+    const category = await this.categoryRepository.findById(categoryId);
+
+    if (!category) throw new NotFoundException('Category not found');
+
+    return category;
   }
 
   @Post()
@@ -59,7 +61,7 @@ export class CategoryController {
       ...newCategory,
       parent: parentCategory,
       createdAt: new Date(),
-    });
+    } as Category);
 
     return createdCategory;
   }
@@ -100,17 +102,8 @@ export class CategoryController {
       ...categoryBody,
       parent: categoryBody.parentId === '' ? null : newParentCategory,
       updatedAt: new Date(),
-    });
+    } as Category);
 
     return updatedCategory;
-  }
-
-  @Delete('/:categoryId')
-  @HttpCode(204)
-  async deleteCategory(@Param('categoryId') categoryId: string) {
-    const foundCategory = await this.categoryRepository.findById(categoryId);
-    if (!foundCategory) throw new NotFoundException();
-
-    await this.categoryRepository.remove(categoryId);
   }
 }

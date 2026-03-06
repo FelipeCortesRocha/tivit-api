@@ -15,13 +15,13 @@ import {
 } from '@nestjs/common';
 import { ProductRepository } from './product.repository';
 import { Product, ProductStatus } from './product.entity';
-import { ZodValidationPipe } from 'src/common/pipes/ZodValidationPipe';
 import * as createProductDto from './dtos/createProductDto';
 import * as updateProductDto from './dtos/updateProductDto';
 import { CategoryRepository } from '../category/category.repository';
 import { In, Not } from 'typeorm';
 import { ProductResponseDto } from './dtos/productResponseDto';
 import { Category } from '../category/category.entity';
+import { ZodValidationPipe } from '../../common/pipes/ZodValidationPipe';
 
 @Controller('products')
 export class ProductController {
@@ -34,20 +34,22 @@ export class ProductController {
     if (string.includes('{'))
       return JSON.parse(string) as Record<string, string>;
 
-    return string.split(',').reduce((newAttributes, currentAttribute) => {
-      const [key, value] = currentAttribute.split(':');
+    return string.split(',').reduce(
+      (newAttributes, currentAttribute) => {
+        const [key, value] = currentAttribute.split(':');
 
-      newAttributes[key.trim()] = value.trim();
+        newAttributes[key.trim()] = value.trim();
 
-      return newAttributes;
-    }, {});
+        return newAttributes;
+      },
+      {} as Record<string, string>,
+    );
   }
 
   @Get()
   async getProducts(): Promise<ProductResponseDto[]> {
     const products = await this.productsRepository.findAll();
 
-    console.log(products);
     return products.map((product: Product) => ({
       ...product,
       attributes: this.attributeStringToObject(product.attributes),
@@ -61,8 +63,8 @@ export class ProductController {
     const product = await this.productsRepository.findById(productId);
     return {
       ...product,
-      attributes: this.attributeStringToObject(product.attributes),
-    };
+      attributes: this.attributeStringToObject(product?.attributes ?? ''),
+    } as ProductResponseDto;
   }
 
   @Post('')
@@ -157,9 +159,9 @@ export class ProductController {
 
       if (categoriesToRemove && categoriesToRemove.length > 0) {
         categoriesToRemove.forEach((categoryId: string) => {
-          const index = categoriesToAdd.indexOf(categoryId);
-          if (index !== -1) {
-            categoriesToAdd.splice(index, 1);
+          const index = categoriesToAdd?.indexOf(categoryId);
+          if (index && index !== -1) {
+            categoriesToAdd?.splice(index, 1);
           }
 
           const indexInExistingCategories =
