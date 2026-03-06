@@ -10,8 +10,8 @@ export class CategoryRepository {
     private categoriesRepository: Repository<Category>,
   ) {}
 
-  find(where: Record<string, any>): Promise<Category> {
-    return this.categoriesRepository.findOne({
+  find(where: Record<string, any>): Promise<Category[]> {
+    return this.categoriesRepository.find({
       where,
       relations: {
         parent: true,
@@ -36,11 +36,7 @@ export class CategoryRepository {
     });
   }
 
-  async create(category: Partial<Category>): Promise<Category> {
-    return await this.categoriesRepository.save(category);
-  }
-
-  async update(category: Category): Promise<Category> {
+  async save(category: Partial<Category>): Promise<Category> {
     return await this.categoriesRepository.save(category);
   }
 

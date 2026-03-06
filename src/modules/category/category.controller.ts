@@ -18,23 +18,23 @@ import * as createCategoryDto from './dtos/createCategoryDto';
 import * as updateCategoryDto from './dtos/updateCategoryDto';
 import { Not } from 'typeorm';
 
-@Controller()
+@Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryRepository: CategoryRepository) {}
 
-  @Get('/categories')
+  @Get()
   async getCategories(): Promise<Category[]> {
     return await this.categoryRepository.findAll();
   }
 
-  @Get('/categories/:categoryId')
+  @Get('/:categoryId')
   async getCategory(
     @Param('categoryId') categoryId: string,
   ): Promise<Category> {
     return await this.categoryRepository.findById(categoryId);
   }
 
-  @Post('/categories')
+  @Post()
   @UsePipes(new ZodValidationPipe(createCategoryDto.createCategorySchema))
   async postCategory(
     @Body() newCategory: createCategoryDto.CreateCategoryDto,
@@ -52,10 +52,10 @@ export class CategoryController {
       name: newCategory.name,
     });
 
-    if (existingCategory)
+    if (existingCategory.length > 0)
       throw new BadRequestException('Category name already exists');
 
-    const createdCategory = await this.categoryRepository.create({
+    const createdCategory = await this.categoryRepository.save({
       ...newCategory,
       parent: parentCategory,
       createdAt: new Date(),
@@ -64,7 +64,7 @@ export class CategoryController {
     return createdCategory;
   }
 
-  @Patch('/categories/:categoryId')
+  @Patch('/:categoryId')
   @UsePipes(new ZodValidationPipe(updateCategoryDto.updateCategorySchema))
   async updateCategory(
     @Body() categoryBody: updateCategoryDto.UpdateCategoryDto,
@@ -80,7 +80,7 @@ export class CategoryController {
         name: categoryBody.name,
       });
 
-      if (existingCategory)
+      if (existingCategory.length > 0)
         throw new BadRequestException('Category name already exists');
     }
 
@@ -95,7 +95,7 @@ export class CategoryController {
 
     const categoryToUpdate = await this.categoryRepository.findById(categoryId);
 
-    const updatedCategory = await this.categoryRepository.update({
+    const updatedCategory = await this.categoryRepository.save({
       ...categoryToUpdate,
       ...categoryBody,
       parent: categoryBody.parentId === '' ? null : newParentCategory,
@@ -105,7 +105,7 @@ export class CategoryController {
     return updatedCategory;
   }
 
-  @Delete('/categories/:categoryId')
+  @Delete('/:categoryId')
   @HttpCode(204)
   async deleteCategory(@Param('categoryId') categoryId: string) {
     const foundCategory = await this.categoryRepository.findById(categoryId);
